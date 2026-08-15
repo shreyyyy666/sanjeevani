@@ -30,7 +30,7 @@ export default function NewAssessment() {
     setUploadProgress(0);
   };
   const uploadPrivately = async (selected: File) => {
-    const prepared = await prepareUpload.mutateAsync({ fileName: selected.name, mimeType: selected.type || "application/octet-stream" });
+    const prepared = await prepareUpload.mutateAsync({ fileName: selected.name, mimeType: selected.type || "application/octet-stream", fileSizeBytes: selected.size });
     await new Promise<void>((resolve, reject) => {
       const request = new XMLHttpRequest();
       request.open("PUT", prepared.uploadUrl);

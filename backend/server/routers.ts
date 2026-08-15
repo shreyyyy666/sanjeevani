@@ -26,6 +26,16 @@ import {
 const disclosureStatus = z.enum(["private", "internal_review", "public_disclosure", "published"]);
 const entityKind = z.enum(["compound", "api", "synthesis_step", "therapeutic_context", "date", "citation"]);
 const assistantMode = z.enum(["explain", "guide"]);
+const allowedResearchMimeTypes = new Set(["application/pdf", "text/plain", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]);
+const MAX_RESEARCH_FILE_BYTES = 10 * 1024 * 1024;
+
+export function assertResearchFile(fileName: string, mimeType: string, fileSizeBytes?: number) {
+  if (!allowedResearchMimeTypes.has(mimeType)) throw new TRPCError({ code: "BAD_REQUEST", message: "Only PDF, TXT, DOC, and DOCX research files are accepted." });
+  const extension = fileName.split(".").pop()?.toLowerCase();
+  const extensionMimeTypes: Record<string, string[]> = { pdf: ["application/pdf"], txt: ["text/plain"], doc: ["application/msword"], docx: ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"] };
+  if (!extension || !extensionMimeTypes[extension]?.includes(mimeType)) throw new TRPCError({ code: "BAD_REQUEST", message: "The file extension must match the declared document type." });
+  if (fileSizeBytes !== undefined && fileSizeBytes > MAX_RESEARCH_FILE_BYTES) throw new TRPCError({ code: "PAYLOAD_TOO_LARGE", message: "Research files must be 10 MB or smaller." });
+}
 
 function requireWorkspaceOwner(workspaceOwnerId: number, ownerId: number) {
   if (workspaceOwnerId !== ownerId) throw new TRPCError({ code: "FORBIDDEN", message: "Workspace access is restricted." });
@@ -63,16 +73,17 @@ export const appRouter = router({
         mimeType: z.string().max(128).optional(),
         fileBase64: z.string().optional(),
         fileKey: z.string().max(512).optional(),
-        fileSizeBytes: z.number().int().positive().max(10 * 1024 * 1024).optional(),
+        fileSizeBytes: z.number().int().positive().max(MAX_RESEARCH_FILE_BYTES).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         let fileKey: string | undefined = input.fileKey;
         let fileSizeBytes: number | undefined = input.fileSizeBytes;
+        if (input.fileName && input.mimeType) assertResearchFile(input.fileName, input.mimeType, input.fileSizeBytes);
         if (fileKey && !fileKey.startsWith(`research/${ctx.user.id}/`)) throw new TRPCError({ code: "FORBIDDEN", message: "The upload key is not scoped to your workspace." });
         if (input.fileBase64 && input.fileName && input.mimeType) {
           const base64 = input.fileBase64.includes(",") ? input.fileBase64.split(",").pop()! : input.fileBase64;
           const buffer = Buffer.from(base64, "base64");
-          if (buffer.byteLength > 10 * 1024 * 1024) throw new TRPCError({ code: "PAYLOAD_TOO_LARGE", message: "Upload must be 10 MB or smaller." });
+          assertResearchFile(input.fileName, input.mimeType, buffer.byteLength);
           const safeName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
           const stored = await storagePut(`research/${ctx.user.id}/${Date.now()}-${safeName}`, buffer, input.mimeType);
           fileKey = stored.key;
@@ -93,8 +104,9 @@ export const appRouter = router({
         });
       }),
     prepareResearchUpload: protectedProcedure
-      .input(z.object({ fileName: z.string().min(1).max(512), mimeType: z.string().min(1).max(128) }))
+      .input(z.object({ fileName: z.string().min(1).max(512), mimeType: z.string().min(1).max(128), fileSizeBytes: z.number().int().positive().max(MAX_RESEARCH_FILE_BYTES) }))
       .mutation(async ({ ctx, input }) => {
+        assertResearchFile(input.fileName, input.mimeType, input.fileSizeBytes);
         const safeName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
         return storagePresignPut(`research/${ctx.user.id}/${Date.now()}-${safeName}`);
       }),
