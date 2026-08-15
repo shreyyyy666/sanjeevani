@@ -1,7 +1,8 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
+import { useEffect } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import AssessmentDetail from "./pages/AssessmentDetail";
@@ -12,6 +13,27 @@ import MyResearch from "./pages/MyResearch";
 import NewAssessment from "./pages/NewAssessment";
 import PatentGuidance from "./pages/PatentGuidance";
 import WorkspaceOverview from "./pages/WorkspaceOverview";
+
+function RouteMetadata() {
+  const [location] = useLocation();
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      "/": "Sanjeevani · Research intelligence",
+      "/workspace": "Workspace overview · Sanjeevani",
+      "/workspace/new": "New assessment · Sanjeevani",
+      "/workspace/research": "My research · Sanjeevani",
+      "/workspace/reports": "Evidence and reports · Sanjeevani",
+      "/workspace/patent-guidance": "Patent guidance · Sanjeevani",
+      "/workspace/network": "Institutional network · Sanjeevani",
+    };
+    document.title = titles[location] ?? (location.startsWith("/workspace/analysis/") ? "Analysis review · Sanjeevani" : "Page not found · Sanjeevani");
+    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]') ?? document.createElement("link");
+    canonical.rel = "canonical";
+    canonical.href = new URL(location, window.location.origin).toString();
+    if (!canonical.parentNode) document.head.appendChild(canonical);
+  }, [location]);
+  return null;
+}
 
 function Router() {
   return (
@@ -36,6 +58,7 @@ export default function App() {
       <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster richColors position="top-right" />
+          <RouteMetadata />
           <Router />
         </TooltipProvider>
       </ThemeProvider>

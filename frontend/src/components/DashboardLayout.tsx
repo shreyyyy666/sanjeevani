@@ -48,7 +48,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       <Sidebar collapsible="icon" className="border-r border-white/8 bg-[#111325] text-slate-100">
         <SidebarHeader className="h-[82px] justify-center border-b border-white/8 px-3">
           <div className="flex w-full items-center gap-3">
-            <button onClick={() => setLocation("/workspace")} className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1 py-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            <button aria-label="Go to workspace overview" onClick={() => setLocation("/workspace")} className="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-1 py-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
               <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-primary/40 bg-primary/10 mono text-xs font-medium text-primary">S</span>
               <span className="group-data-[collapsible=icon]:hidden">
                 <span className="block text-sm font-semibold tracking-tight">Sanjeevani</span>
@@ -79,7 +79,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </SidebarContent>
         <SidebarFooter className="border-t border-white/8 p-3">
-          <button onClick={logout} className="flex w-full items-center gap-3 rounded-lg p-1 text-left transition-colors hover:bg-white/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <button aria-label="Sign out of Sanjeevani" onClick={logout} className="flex w-full items-center gap-3 rounded-lg p-1 text-left transition-colors hover:bg-white/7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
             <Avatar className="size-8 border border-white/12"><AvatarFallback className="bg-primary/15 text-xs text-primary">{user?.name?.charAt(0).toUpperCase() || "R"}</AvatarFallback></Avatar>
             <span className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden"><span className="block truncate text-xs font-medium text-white">{user?.name || "Researcher"}</span><span className="block truncate text-[10px] text-slate-500">{access.data?.level === "institutional_reviewer" ? "Institutional reviewer" : access.data?.level === "administrator" ? "Administrator" : "Researcher"}</span></span>
             <LogOut className="size-3.5 text-slate-500 group-data-[collapsible=icon]:hidden" />

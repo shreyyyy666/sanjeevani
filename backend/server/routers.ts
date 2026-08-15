@@ -121,7 +121,7 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         const detail = await getAssessmentDetail(ctx.user.id, input.analysisRunId);
         if (!detail) throw new TRPCError({ code: "NOT_FOUND", message: "Assessment not found." });
-        await addExtractionEntity(input);
+        await addExtractionEntity({ ownerId: ctx.user.id, ...input });
         return { success: true };
       }),
     confirmEntity: protectedProcedure

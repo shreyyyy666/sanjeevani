@@ -185,6 +185,7 @@ export async function getAssessmentDetail(ownerId: number, analysisRunId: number
 }
 
 export async function addExtractionEntity(input: {
+  ownerId: number;
   analysisRunId: number;
   kind: "compound" | "api" | "synthesis_step" | "therapeutic_context" | "date" | "citation";
   label: string;
@@ -194,7 +195,14 @@ export async function addExtractionEntity(input: {
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  await db.insert(extractedEntities).values({ ...input, details: input.details ?? null, pageNumber: input.pageNumber ?? null, sectionLabel: input.sectionLabel ?? null });
+  const allowed = await db
+    .select({ analysisRunId: analysisRuns.id })
+    .from(analysisRuns)
+    .where(and(eq(analysisRuns.id, input.analysisRunId), eq(analysisRuns.ownerId, input.ownerId)))
+    .limit(1);
+  if (!allowed[0]) throw new Error("Analysis run not found");
+  const { ownerId: _ownerId, ...entity } = input;
+  await db.insert(extractedEntities).values({ ...entity, details: input.details ?? null, pageNumber: input.pageNumber ?? null, sectionLabel: input.sectionLabel ?? null });
 }
 
 export async function setExtractionEntityConfirmation(ownerId: number, entityId: number, confirmed: boolean) {
