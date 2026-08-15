@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1786805827411,
+      "tag": "0000_lying_liz_osborn",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1786806133078,
+      "tag": "0001_nasty_dragon_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786806321386,
+      "tag": "0002_stormy_thena",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1786807135846,
+      "tag": "0003_wooden_microbe",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1786807196391,
+      "tag": "0004_fancy_blur",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1786810628694,
+      "tag": "0005_legal_vivisector",
+      "breakpoints": true
+    }
+  ]
+}

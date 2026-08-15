@@ -1,0 +1,1 @@
+ALTER TABLE `chemistryFindings` MODIFY COLUMN `category` enum('exact_identity','structure_similarity','route_analysis','source_provenance','feasibility') NOT NULL;
